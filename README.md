@@ -135,3 +135,27 @@ const wss = new WebSocketServer({ server });
 
 server.listen(3000, handleListen);
 ```
+
+### WebSocket Events
+
+```
+src/server.js
+
+import { WebSocketServer } from "ws";
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+
+const handleConnection = (socket) => {
+  console.log(socket);
+};
+wss.on("connection", handleConnection);
+server.listen(3001, handleListen);
+```
+server에서의 socket은 브라우저를 의미함
+
+```
+src/public/js/app.js
+
+const socket = new WebSocket(`ws://${window.location.host}`);
+```
+frontend에서의  socket은 서버와의 연결을 의미함

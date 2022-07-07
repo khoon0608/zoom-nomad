@@ -39,7 +39,9 @@ touch .gitignore
 }
 ```
 
-4. express, pug 설치
+## Front end Setup
+
+1. express, pug 설치
 
 ```
 // 터미털
@@ -57,13 +59,13 @@ console.log("Hello");
 app.listen(3000);
 ```
 
-5. 라우터 설정
+2. 라우터 설정
 
 ```
 // server.js
 app.set("view engine", "pug"); => view engine을 pug로 설정
 app.set("views", __dirname + "/views"); => express에 view로 나타낼 파일경로 설정
-app.use("/public", express.static(__dirname + "/public")); => public url을 생성해서 유조에게 파일을 공유
+app.use("/public", express.static(__dirname + "/public")); => public url을 생성해서 유저에게 공개할 파일의 경로를 지정
 app.get("/", (req, res) => res.render("home")); // "/"로 왔을 때 "home.pug"를 렌더링
 ```
 
@@ -78,7 +80,7 @@ html(lang="en")
     title Noom
     link(rel="stylesheet", href="https://unpkg.com/mvp.css")
   body
-    header 
+    header
       h1 It works!
     main
       button DOG
@@ -87,4 +89,27 @@ html(lang="en")
 
 ```
 /src/public/js/app.js
+```
+
+3. 코드 업데이트 자동화
+
+```
+// 터미널
+npm i -D livereload connect-livereload
+```
+
+```
+src/server.js
+
+import livereloadMiddleware from "connect-livereload";
+import livereload from "livereload";
+
+const liveServer = livereload.createServer({
+exts: ["js", "pug", "css"],
+delay: 1000,
+});
+
+liveServer.watch(__dirname);
+
+app.use(livereloadMiddleware());
 ```

@@ -2,7 +2,8 @@
 
 # zoom-nomad
 
-## Server Setup
+## Chapter 01
+### Server Setup
 
 1. babel package 설치
 
@@ -39,7 +40,7 @@ touch .gitignore
 }
 ```
 
-## Front end Setup
+### Frontend Setup
 
 1. express, pug 설치
 
@@ -112,4 +113,25 @@ delay: 1000,
 liveServer.watch(__dirname);
 
 app.use(livereloadMiddleware());
+```
+
+## Chapter 2
+
+### WebSockets in NodeJS
+
+```
+// 터미널
+npm i ws
+```
+
+```
+/src/server/js/app.js
+
+import livereloadMiddleware from "connect-livereload";
+import livereload from "livereload";
+import http from "http";
+const server = http.createServer({server});
+const wss = new WebSocketServer({ server });
+
+server.listen(3000, handleListen);
 ```

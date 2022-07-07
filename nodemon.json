@@ -1,0 +1,3 @@
+{
+  "exec": "npx bebel-node src/server.js"
+}

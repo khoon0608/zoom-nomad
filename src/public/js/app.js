@@ -1,5 +1,1 @@
-/** @format */
-
-Hi;
-Hey;
-Nice;
+const socket = new WebSocket(`ws://${window.location.host}`);

@@ -1,11 +1,12 @@
 /** @format */
-import express from "express";
 import livereloadMiddleware from "connect-livereload";
 import livereload from "livereload";
+import express from "express";
 import http from "http";
-import {WebSocketServer} from "ws";
+import { WebSocketServer } from "ws";
 
 const app = express();
+
 const liveServer = livereload.createServer({
   exts: ["js", "pug", "css"],
   delay: 1000,
@@ -20,9 +21,13 @@ app.use(livereloadMiddleware());
 app.get("/", (_, res) => res.render("home"));
 app.get("/*", (_, res) => res.redirect("/"));
 
-const handleListen = () => console.log(`Listening on http://localhost:3000`);
+const handleListen = () => console.log(`Listening on http://localhost:3001`);
 
-const server = http.createServer({server});
+const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-server.listen(3000, handleListen);
+const handleConnection = (socket) => {
+  console.log(socket);
+};
+wss.on("connection", handleConnection);
+server.listen(3001, handleListen);

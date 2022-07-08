@@ -3,6 +3,7 @@
 # zoom-nomad
 
 ## Chapter 01
+
 ### Server Setup
 
 1. babel package 설치
@@ -151,6 +152,7 @@ const handleConnection = (socket) => {
 wss.on("connection", handleConnection);
 server.listen(3001, handleListen);
 ```
+
 server에서의 socket은 브라우저를 의미함
 
 ```
@@ -158,4 +160,42 @@ src/public/js/app.js
 
 const socket = new WebSocket(`ws://${window.location.host}`);
 ```
-frontend에서의  socket은 서버와의 연결을 의미함
+
+frontend에서의 socket은 서버와의 연결을 의미함
+
+### WebSocket Messages
+
+socket.send: 다른쪽으로 명령을 보낼 때 쓰임
+socket.on: 다른쪽에서 보낸 명령을 받을 때 쓰임
+둘 다 ("명령", 콜백) 형식임
+```
+src/server.js
+
+wss.on("connection", (socket) => {
+  console.log("Connected to Browser ✅");
+  socket.on("close", () => console.log("Disconnected from Browser ❌"));
+  socket.on("message", (message) => console.log("take message: " + message));
+  socket.send("Hello");
+});
+server.listen(3001, handleListen);
+```
+
+```
+src/public/js/app.js
+
+socket.addEventListener("open", () => {
+  console.log("Connected from Server ✅");
+});
+
+socket.addEventListener("message", (message) => {
+  console.log("New Message: ", message.data, " from the Server");
+});
+
+socket.addEventListener("close", () => {
+  console.log("Disconnected from Server ❌");
+});
+
+setTimeout(() => {
+  socket.send("hello, this message was sended by frontend!");
+}, 5000);
+```

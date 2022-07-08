@@ -39,6 +39,5 @@ sendButton.addEventListener("click", (e) => {
     message: inputMessage.value,
   };
   socket.send(JSON.stringify(obj));
-  inputNickname.value = "";
   inputMessage.value = "";
 });

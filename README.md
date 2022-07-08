@@ -199,3 +199,74 @@ setTimeout(() => {
   socket.send("hello, this message was sended by frontend!");
 }, 5000);
 ```
+
+### Chat Completed
+
+
+```
+src/server.js
+
+wss.on("connection", (socket) => {
+  socketArr.push(socket);
+  console.log("Connected to Browser ✅");
+  socket.on("close", () => console.log("Disconnected from Browser ❌"));
+  socket.on("message", (message) =>
+    socketArr.forEach((oneSocket) => oneSocket.send(message.toString()))
+  );
+});
+server.listen(3001, handleListen);
+```
+
+```
+src/views/home.pug
+
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(http-equiv="X-UA-Compatible", content="IE=edge")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Noom
+    link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+  body
+    header 
+      h1 NOOM
+    main
+      ul
+      form(action="")
+        input(type="input", placeholder="write a message", required)
+        button Send
+    script(src="/public/js/app.js")
+```
+
+```
+src/public/js/app.js
+
+const messageForm = document.querySelector("form");
+const sendButton = messageForm.querySelector("button");
+const messageUl = document.querySelector("ul");
+
+const socket = new WebSocket(`ws://${window.location.host}`);
+
+socket.addEventListener("open", () => {
+  console.log("Connected from Server ✅");
+});
+
+socket.addEventListener("close", () => {
+  console.log("Disconnected from Server ❌");
+});
+
+socket.addEventListener("message", (message) => {
+  console.log(message.data);
+});
+
+messageForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+});
+
+sendButton.addEventListener("click", (e) => {
+  e.preventDefault();
+  const input = messageForm.querySelector("input");
+  socket.send(input.value);
+});
+```

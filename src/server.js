@@ -32,8 +32,8 @@ wss.on("connection", (socket) => {
   socketArr.push(socket);
   console.log("Connected to Browser ✅");
   socket.on("close", () => console.log("Disconnected from Browser ❌"));
-  socket.on("message", (message) =>
-    socketArr.forEach((oneSocket) => oneSocket.send(message.toString()))
-  );
+  socket.on("message", (message) => {
+    socketArr.forEach((oneSocket) => oneSocket.send(message.toString("utf-8")));
+  });
 });
 server.listen(3001, handleListen);

@@ -375,7 +375,7 @@ wsServer.on("connection", (socket) => {
   socket.on("enter_room", (msg, done) => {
     console.log(msg);
     setTimeout(() => {
-      done();
+      done(); // 프론트엔드에서 받은 함수를 백엔드에서 프론트엔드로 실행시키게 함
     }, 5000);
   });
 });
@@ -407,4 +407,60 @@ form.addEventListener("submit", (e) => {
         form(action="")
           input(placeholder="room name", required, type="text")
           button Enter Room  
+```
+### Rooms
+
+```
+server.js
+
+wsServer.on("connection", (socket) => {
+  socket.onAny((event) => console.log(`Socket Event: ${event}`));
+  socket.on("enter_room", (roomName, showRoom) => {
+    socket.join(roomName.payload);
+    showRoom();
+  });
+});
+```
+
+``` public/js/app.js
+
+const socket = io();
+
+const welcome = document.querySelector("#welcome");
+const form = welcome.querySelector("form");
+const room = document.querySelector("#room");
+
+room.hidden = true;
+
+let roomName;
+
+function showRoom() {
+  welcome.hidden = true;
+  room.hidden = false;
+  const h3 = room.querySelector("#room-name");
+  h3.innerText = roomName;
+}
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = form.querySelector("input");
+  socket.emit("enter_room", { payload: input.value }, showRoom);
+  roomName = input.value;
+  input.value = "";
+});
+```
+
+```
+views/home.pug
+
+    main
+      div#welcome
+        form(action="")
+          input(placeholder="room name", required, type="text")
+          button Enter Room  
+      div#room
+        h3#room-name
+        ul
+        form(action="")
+          input#message(placeholder="message", required, type="text")
 ```

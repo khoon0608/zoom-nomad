@@ -3,7 +3,7 @@ import livereloadMiddleware from "connect-livereload";
 import livereload from "livereload";
 import express from "express";
 import http from "http";
-import { WebSocketServer } from "ws";
+import { Server } from "socket.io";
 
 const app = express();
 
@@ -23,17 +23,28 @@ app.get("/*", (_, res) => res.redirect("/"));
 
 const handleListen = () => console.log(`Listening on http://localhost:3001`);
 
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
+const wsServer = new Server(httpServer);
+
+wsServer.on("connection", (socket) => {
+  socket.on("enter_room", (msg, done) => {
+    console.log(msg);
+    setTimeout(() => {
+      done();
+    }, 5000);
+  });
+});
+/*
 const wss = new WebSocketServer({ server });
 
 const socketArr = [];
 
 wss.on("connection", (socket) => {
   socketArr.push(socket);
-  console.log("Connected to Browser ✅");
-  socket.on("close", () => console.log("Disconnected from Browser ❌"));
   socket.on("message", (message) => {
     socketArr.forEach((oneSocket) => oneSocket.send(message.toString("utf-8")));
   });
-});
-server.listen(3001, handleListen);
+});\
+*/
+
+httpServer.listen(3001, handleListen);

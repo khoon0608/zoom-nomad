@@ -319,3 +319,92 @@ sendButton.addEventListener("click", (e) => {
 });
 ```
 
+## SocketIO
+
+### Installing SocketIO
+
+``` 
+// 터미널
+
+npm i socket.io
+```
+
+```
+// server.js
+
+import {Sever} from "socket.io";
+const httpServer = http.createServer(app);
+const wsServer = new Server(httpServer);
+
+wsServer.on("connection", (socket) => {
+  console.log(socket);
+});
+```
+
+```
+// src/public/app.js
+
+const socket = io();
+```
+
+```
+// src/views/home.pug
+
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(http-equiv="X-UA-Compatible", content="IE=edge")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Noom
+    link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+  body
+    header 
+      h1 NOOM
+    main
+    script(src="/socket.io/socket.io.js") 
+    script(src="/public/js/app.js")
+```
+
+### SocketIO is Amazing
+
+```
+// server.js
+
+wsServer.on("connection", (socket) => {
+  socket.on("enter_room", (msg, done) => {
+    console.log(msg);
+    setTimeout(() => {
+      done();
+    }, 5000);
+  });
+});
+```
+
+```
+// public/app.js
+
+const socket = io();
+
+const welcome = document.querySelector("#welcome");
+const form = welcome.querySelector("form");
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = form.querySelector("input");
+  socket.emit("enter_room", { payload: input.value }, () => {
+    console.log("Server is done!");
+  });
+  input.value = "";
+});
+```
+
+```
+// views/home.pug
+
+    main
+      div#welcome
+        form(action="")
+          input(placeholder="room name", required, type="text")
+          button Enter Room  
+```

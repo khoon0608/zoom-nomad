@@ -464,3 +464,31 @@ views/home.pug
         form(action="")
           input#message(placeholder="message", required, type="text")
 ```
+
+### Room Notifications
+
+```
+// server.js
+
+wsServer.on("connection", (socket) => {
+  socket.onAny((event) => console.log(`Socket Event: ${event}`));
+  socket.on("enter_room", (roomName, showRoom) => {
+    socket.join(roomName);
+    showRoom();
+    socket.to(roomName).emit("welcome");
+  });
+});
+```
+
+```
+// public/js/app.js
+
+function addMessage(message) {
+  const chatList = room.querySelector("#chat-list");
+  const chat = document.createElement("li");
+  chat.innerText = message;
+  chatList.append(chat);
+}
+
+socket.on("welcome", () => addMessage("Someone Joined!"));
+```

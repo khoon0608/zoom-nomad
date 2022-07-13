@@ -168,6 +168,7 @@ frontend에서의 socket은 서버와의 연결을 의미함
 socket.send: 다른쪽으로 명령을 보낼 때 쓰임
 socket.on: 다른쪽에서 보낸 명령을 받을 때 쓰임
 둘 다 ("명령", 콜백) 형식임
+
 ```
 src/server.js
 
@@ -201,6 +202,7 @@ setTimeout(() => {
 ```
 
 ### Chat Completed
+
 어느 한 브라우저에서 보낸 메세지를 그 이외의 모든 브라우저에 보내져야 하기 때문에
 socket을 담는 배열을 생성 후 웹사이트에 들어간 브라우저를 저장 후 메세지를 보냄
 
@@ -230,7 +232,7 @@ html(lang="en")
     title Noom
     link(rel="stylesheet", href="https://unpkg.com/mvp.css")
   body
-    header 
+    header
       h1 NOOM
     main
       ul
@@ -323,7 +325,7 @@ sendButton.addEventListener("click", (e) => {
 
 ### Installing SocketIO
 
-``` 
+```
 // 터미널
 
 npm i socket.io
@@ -359,10 +361,10 @@ html(lang="en")
     title Noom
     link(rel="stylesheet", href="https://unpkg.com/mvp.css")
   body
-    header 
+    header
       h1 NOOM
     main
-    script(src="/socket.io/socket.io.js") 
+    script(src="/socket.io/socket.io.js")
     script(src="/public/js/app.js")
 ```
 
@@ -406,8 +408,9 @@ form.addEventListener("submit", (e) => {
       div#welcome
         form(action="")
           input(placeholder="room name", required, type="text")
-          button Enter Room  
+          button Enter Room
 ```
+
 ### Rooms
 
 ```
@@ -422,7 +425,7 @@ wsServer.on("connection", (socket) => {
 });
 ```
 
-``` public/js/app.js
+```public/js/app.js
 
 const socket = io();
 
@@ -457,7 +460,7 @@ views/home.pug
       div#welcome
         form(action="")
           input(placeholder="room name", required, type="text")
-          button Enter Room  
+          button Enter Room
       div#room
         h3#room-name
         ul
@@ -491,4 +494,86 @@ function addMessage(message) {
 }
 
 socket.on("welcome", () => addMessage("Someone Joined!"));
+```
+
+### Nicknames
+
+```
+server.js
+
+wsServer.on("connection", (socket) => {
+  socket.onAny((event) => console.log(`Socket Event: ${event}`));
+  socket.on("enter_room", (roomName, nickname, showRoom) => {
+    socket.join(roomName);
+    showRoom();
+    socket["nickname"] = nickname;
+    socket.to(roomName).emit("welcome", socket.nickname);
+  });
+  socket.on("new_message", (msg, room, done) => {
+    socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
+    done();
+  });
+});
+```
+
+```
+public/js/app.js
+
+const socket = io();
+
+const welcome = document.querySelector("#welcome");
+const home = welcome.querySelector("#home");
+const room = document.querySelector("#room");
+const roomName = home.querySelector("#room-name");
+const nicknameInput = home.querySelector("#nickname");
+
+room.hidden = true;
+
+function addMessage(message) {
+  const chatList = room.querySelector("#chat-list");
+  const chat = document.createElement("li");
+  chat.innerText = message;
+  chatList.append(chat);
+}
+
+function showRoom() {
+  welcome.hidden = true;
+  room.hidden = false;
+  const h3 = room.querySelector("#room-name");
+  h3.innerText = roomName.value;
+  const roomForm = room.querySelector("#room-form");
+  const msgInput = roomForm.querySelector("#message");
+  roomForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    socket.emit("new_message", msgInput.value, roomName.value, () => {
+      addMessage(`Me: ${msgInput.value}`);
+      msgInput.value = "";
+    });
+  });
+}
+
+home.addEventListener("submit", (e) => {
+  e.preventDefault();
+  socket.emit("enter_room", roomName.value, nicknameInput.value, showRoom);
+});
+
+socket.on("welcome", (user) => addMessage(`${user} joined!`));
+socket.on("new_message", addMessage);
+```
+
+```
+views/home.pug
+
+   main
+      div#welcome
+        form#home(action="")
+          input#room-name(placeholder="room name", required, type="text")
+          input#nickname(placeholder="nickname", required, type="text")
+          button Enter Room
+      div#room
+        h3#room-name
+        ul#chat-list
+        form#room-form(action="")
+          input#message(placeholder="message", required, type="text")
+          button#message-send Send
 ```

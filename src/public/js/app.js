@@ -38,4 +38,14 @@ home.addEventListener("submit", (e) => {
 });
 
 socket.on("welcome", (user) => addMessage(`${user} joined!`));
+socket.on("bye", (user) => addMessage(`${user} left :(`));
 socket.on("new_message", addMessage);
+socket.on("room_change", (rooms) => {
+  const roomList = welcome.querySelector("#room-list");
+  if (rooms.length == 0) roomList.innerHTML = "";
+  rooms.forEach((room) => {
+    const openRoom = document.createElement("li");
+    openRoom.innerText = room;
+    roomList.append(openRoom);
+  });
+});

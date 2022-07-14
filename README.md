@@ -577,3 +577,70 @@ views/home.pug
           input#message(placeholder="message", required, type="text")
           button#message-send Send
 ```
+
+### Room Count
+
+```
+// server.js
+
+function publicRooms() {
+  const {
+    sockets: {
+      adapter: { sids, rooms },
+    },
+  } = wsServer;
+  const publicRooms = [];
+  rooms.forEach((_, key) => {
+    if (sids.get(key) === undefined) publicRooms.push(key);
+  });
+  return publicRooms;
+}
+wsServer.on("connection", (socket) => {
+  socket.onAny((event) => console.log(`Socket Event: ${event}`));
+  wsServer.sockets.emit("room_change", publicRooms());
+  socket.on("enter_room", (roomName, nickname, showRoom) => {
+    socket.join(roomName);
+    showRoom();
+    socket["nickname"] = nickname;
+    socket.to(roomName).emit("welcome", socket.nickname);
+    wsServer.sockets.emit("room_change", publicRooms());
+  });
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach((room) =>
+      socket.to(room).emit("bye", socket.nickname)
+    );
+  });
+  socket.on("disconnect", () =>
+    wsServer.sockets.emit("room_change", publicRooms())
+  );
+  socket.on("new_message", (msg, room, done) => {
+    socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
+    done();
+  });
+});
+```
+
+```
+// views/home.pug
+
+div#welcome
+        form#home(action="")
+          input#room-name(placeholder="room name", required, type="text")
+          input#nickname(placeholder="nickname", required, type="text")
+          button Enter Room  
+        ul#room-list
+```
+
+```
+// public/js/app.js
+
+socket.on("room_change", (rooms) => {
+  const roomList = welcome.querySelector("#room-list");
+  if (rooms.length == 0) roomList.innerHTML = "";
+  rooms.forEach((room) => {
+    const openRoom = document.createElement("li");
+    openRoom.innerText = room;
+    roomList.append(openRoom);
+  });
+});
+```

@@ -37,8 +37,16 @@ home.addEventListener("submit", (e) => {
   socket.emit("enter_room", roomName.value, nicknameInput.value, showRoom);
 });
 
-socket.on("welcome", (user) => addMessage(`${user} joined!`));
-socket.on("bye", (user) => addMessage(`${user} left :(`));
+socket.on("welcome", (user, newCount) => {
+  const h3 = room.querySelector("#room-name");
+  h3.innerText = `${roomName.value}: (${newCount})`;
+  addMessage(`${user} joined!`);
+});
+socket.on("bye", (user, newCount) => {
+  const h3 = room.querySelector("#room-name");
+  h3.innerText = `${roomName.value}: (${newCount})`;
+  addMessage(`${user} left :(`);
+});
 socket.on("new_message", addMessage);
 socket.on("room_change", (rooms) => {
   const roomList = welcome.querySelector("#room-list");

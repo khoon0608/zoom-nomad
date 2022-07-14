@@ -627,7 +627,7 @@ div#welcome
         form#home(action="")
           input#room-name(placeholder="room name", required, type="text")
           input#nickname(placeholder="nickname", required, type="text")
-          button Enter Room  
+          button Enter Room
         ul#room-list
 ```
 
@@ -642,5 +642,34 @@ socket.on("room_change", (rooms) => {
     openRoom.innerText = room;
     roomList.append(openRoom);
   });
+});
+```
+
+### user count
+
+```
+server.js
+function countRoomMember(roomName) {
+  return wsServer.sockets.adapter.rooms.get(roomName)?.size;
+}
+socket
+      .to(roomName)
+      .emit("welcome", socket.nickname, countRoomMember(roomName));
+    wsServer.sockets.emit("room_change", publicRooms());
+socket.on("disconnect", () =>
+    wsServer.sockets.emit("room_change", publicRooms())
+  );
+```
+
+```
+socket.on("welcome", (user, newCount) => {
+  const h3 = room.querySelector("#room-name");
+  h3.innerText = `${roomName.value}: (${newCount})`;
+  addMessage(`${user} joined!`);
+});
+socket.on("bye", (user, newCount) => {
+  const h3 = room.querySelector("#room-name");
+  h3.innerText = `${roomName.value}: (${newCount})`;
+  addMessage(`${user} left :(`);
 });
 ```
